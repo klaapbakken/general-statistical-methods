@@ -43,3 +43,13 @@ class LassoRegression():
             plt.ylabel('MSE')
             plt.axis('tight')
             plt.show()
+
+    def test(self, test_x, test_y, visualize=True):
+        prediction = self.model.predict(test_x)
+
+        if visualize:
+            plt.figure()
+            plt.plot(test_y, prediction, '.', alpha=0.1)
+            plt.title('RMSE: %f'%np.sqrt(np.mean( (prediction - test_y)**2 )))
+            plt.show()
+    
