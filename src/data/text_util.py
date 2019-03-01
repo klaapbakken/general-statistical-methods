@@ -21,8 +21,7 @@ def create_bow_dataset(num_rows, min_word_freq=100):
     train, val = remove_useless_columns(train, val)
     train, val = encode_categorical_variables(train, val)
 
-    # train, val = remove_nans_from_parameters(train, val)
-    # train, val = remove_nans_from_rows(train, val)
+    train, val = remove_nans_from_rows(train, val)
 
     train.to_csv("./data/processed/train_with_bow.csv", index=False)
     val.to_csv("./data/processed/validation_with_bow.csv", index=False)
@@ -83,7 +82,8 @@ def text_column_to_bag_of_words(training_data, val_data, min_word_freq=10):
 
 def remove_useless_columns(train, val):
     """Removing columns that seem useless."""
-    useless_columns = ["Unnamed: 0", "item_id", "item_seq_number"]
+    useless_columns = ["Unnamed: 0", "item_id", "image",
+                       "item_seq_number", "user_id", "city"]
     train = train.drop(columns=useless_columns)
     val = val.drop(columns=useless_columns)
     return train, val
@@ -93,11 +93,17 @@ def encode_categorical_variables(train, val):
     """Encodes all categorical variables for the model"""
     # Easier to remove continuous var then listing up all categoricals.
 
-    print("Columns: ", val.columns)
+    num_train_rows = train.shape[0]
+    df = pd.concat((train, val), ignore_index=True)
+    df = pd.get_dummies(df, dummy_na=True)
 
-    train = pd.get_dummies(train, dummy_na=True)
-    print("Duplicated stuff: ", val[val.index.duplicated()])
-    val.reindex(columns=train.columns, fill_value=0)
+    train = df.iloc[0:num_train_rows, :]
+    val = df.iloc[num_train_rows:, :]
+    null_columns = list(train.loc[:, (train == 0).all(axis=0)])
+
+    train.drop(columns=null_columns, axis=1)
+    val.drop(columns=null_columns, axis=1)
+
     return train, val
 
 
