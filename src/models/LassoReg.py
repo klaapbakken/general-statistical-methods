@@ -8,8 +8,6 @@ from sklearn.utils import parallel_backend
 from sklearn.linear_model import LassoCV
 import matplotlib.pyplot as plt
 import matplotlib
-matplotlib.use('Agg')
-
 
 class LassoRegression():
 

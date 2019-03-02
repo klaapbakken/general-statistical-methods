@@ -1,3 +1,8 @@
+"""
+To create the bow dataset you should run "python -m src.data.text_util" from the general
+statistical methods folder.
+"""
+
 import os
 import pandas as pd
 
@@ -111,8 +116,5 @@ def remove_nans_from_rows(train, val):
 
 
 if __name__ == "__main__":
-    """
-    To create the bow dataset you should run "python -m src.data.text_util" from the general
-    statistical methods folder.
-    """
+
     create_bow_dataset()
