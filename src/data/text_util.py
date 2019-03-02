@@ -5,23 +5,22 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import OneHotEncoder
 
 
-def create_bow_dataset(num_rows, min_word_freq=100):
+def create_bow_dataset(num_rows=None):
     """
     Creates a dataset using bag of words and saves it in processed.
 
     Args:
-        min_word_freq: Minimum frequency of a word for it to be included in
+        min_word_freq: Minimum frequency of a word for it to be included system
                        the bag of words.
     """
 
-    train = pd.read_csv('./data/interim/train.csv', nrows=num_rows)
-    val = pd.read_csv('./data/interim/validation.csv', nrows=num_rows)
+    train = pd.read_csv('./data/interim/trimmed_train_train.csv', nrows=num_rows)
+    val = pd.read_csv('./data/interim/trimmed_train_validation.csv', nrows=num_rows)
 
     train, val = replace_text_columns_with_bow(train, val)
-    train, val = remove_useless_columns(train, val)
-    train, val = encode_categorical_variables(train, val)
+    # train, val = encode_categorical_variables(train, val)
 
-    train, val = remove_nans_from_rows(train, val)
+    # train, val = remove_nans_from_rows(train, val)
 
     train.to_csv("./data/processed/train_with_bow.csv", index=False)
     val.to_csv("./data/processed/validation_with_bow.csv", index=False)
@@ -31,12 +30,11 @@ def replace_text_columns_with_bow(train, val, text_columns=['title', 'descriptio
 
     for column in text_columns:
         train_text = train[column]
-        val_text = train[column]
-
+        val_text = val[column]
         train_bow, val_bow = text_column_to_bag_of_words(train_text, val_text)
 
-        train = pd.concat([train, train_bow], axis=1).reset_index()
-        val = pd.concat([val, val_bow], axis=1).reset_index()
+        train = pd.concat([train, train_bow], axis=1, copy=False)
+        val = pd.concat([val, val_bow], axis=1, copy=False)
 
     train = train.drop(columns=text_columns)
     val = val.drop(columns=text_columns)
@@ -44,7 +42,7 @@ def replace_text_columns_with_bow(train, val, text_columns=['title', 'descriptio
     return train, val
 
 
-def text_column_to_bag_of_words(training_data, val_data, min_word_freq=10):
+def text_column_to_bag_of_words(training_data, val_data, min_word_freq=10000):
     """
     Converts a column of data to bag of words
 
@@ -78,16 +76,6 @@ def text_column_to_bag_of_words(training_data, val_data, min_word_freq=10):
         bow_val_data.toarray(), columns=vec.get_feature_names())
 
     return pd.DataFrame(bow_training_data), pd.DataFrame(bow_val_data)
-
-
-def remove_useless_columns(train, val):
-    """Removing columns that seem useless."""
-    useless_columns = ["Unnamed: 0", "item_id", "image",
-                       "item_seq_number", "user_id", "city"]
-    train = train.drop(columns=useless_columns)
-    val = val.drop(columns=useless_columns)
-    return train, val
-
 
 def encode_categorical_variables(train, val):
     """Encodes all categorical variables for the model"""
@@ -127,4 +115,4 @@ if __name__ == "__main__":
     To create the bow dataset you should run "python -m src.data.text_util" from the general
     statistical methods folder.
     """
-    create_bow_dataset(num_rows=1000)
+    create_bow_dataset()
