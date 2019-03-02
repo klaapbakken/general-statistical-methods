@@ -24,7 +24,7 @@ validation_df = pd.read_csv(validation_data)
 trimmed_training_df = trim_dataframe(training_df)
 trimmed_validation_df = trim_dataframe(validation_df)
 
-trimmed_training_df.to_csv(os.path.join(data_folder, "interim", "trimmed_train_train.csv"))
-trimmed_validation_df.to_csv(os.path.join(data_folder, "interim", "trimmed_train_validation.csv"))
+trimmed_training_df.to_csv(os.path.join(data_folder, "interim", "trimmed_train_train.csv"), index=False)
+trimmed_validation_df.to_csv(os.path.join(data_folder, "interim", "trimmed_train_validation.csv"), index=False)
 
 
