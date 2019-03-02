@@ -22,5 +22,5 @@ df = pd.read_csv(training_data)
 
 train_df, validation_df = train_test_split(df, test_size = 0.2, random_state=1337)
 
-train_df.to_csv(os.path.join(data_folder, "interim", "train.csv"))
-validation_df.to_csv(os.path.join(data_folder, "interim", "validation.csv"))
+train_df.to_csv(os.path.join(data_folder, "interim", "train_train.csv"))
+validation_df.to_csv(os.path.join(data_folder, "interim", "train_validation.csv"))
