@@ -12,7 +12,7 @@ def trim_dataframe(df):
     
     features_to_drop = ["Unnamed: 0", "item_id", "city", "param_2", "param_3", "item_seq_number", "image_top_1", "user_id", "activation_date"]
     trimmed_df = trimmed_df.drop(features_to_drop, axis=1)
-return trimmed_df
+    return trimmed_df
 
 with open(os.path.join(os.pardir, "train_path.txt"), 'r') as f:
     train_path = f.readline().rstrip("\n")
