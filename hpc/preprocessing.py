@@ -123,7 +123,7 @@ raw_train_df, raw_val_df = train_test_split(raw_df, test_size = 0.2, random_stat
 feature_to_index_maps = get_feature_to_index_maps(raw_train_df)
 
 train_df = change_data_representation(raw_train_df, feature_to_index_maps, data_folder, train_image_folder_path)
-val_df = change_data_representation(raw_val_df, feature_to_index_maps, data_folder, image_folder)
+val_df = change_data_representation(raw_val_df, feature_to_index_maps, data_folder, train_image_folder_path)
 
 enc = create_one_hot_encoder(train_df)
 numerical_features = ["price", "user_active_ads", "days_since_activation_num"]
