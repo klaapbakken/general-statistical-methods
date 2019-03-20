@@ -118,7 +118,7 @@ data_folder = os.path.abspath(os.path.join(os.path.dirname(os.curdir), "data", "
 
 raw_df = trim_dataframe(pd.read_csv(train_path))
 
-raw_train_df, raw_val_df = train_test_split(df, test_size = 0.2, random_state=1337)
+raw_train_df, raw_val_df = train_test_split(raw_df, test_size = 0.2, random_state=1337)
 
 feature_to_index_maps = get_feature_to_index_maps(raw_train_df)
 
