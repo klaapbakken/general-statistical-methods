@@ -1,11 +1,11 @@
 import os
 
-with f as open(os.path.join(os.pardir, "train_path.txt")):
-    train_folder = f.readline()
+with open(os.path.join(os.pardir, "train_path.txt"), 'r') as f:
+    train_folder = f.read()
     f.close()
 
-with f as open(os.path.join(os.pardir, "train_image_path.txt")):
-    train_image_folder = f.readline()
+with open(os.path.join(os.pardir, "train_image_path.txt"), 'r') as f:
+    train_image_folder = f.read()
     f.close()
 
 print(train_folder, train_image_folder)
