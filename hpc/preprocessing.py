@@ -10,7 +10,7 @@ def trim_dataframe(df):
     activation_range_length = activation_dates[-1] - activation_dates[1]
     trimmed_df = trimmed_df.assign(days_since_activation = last_activation_date - pd.to_datetime(trimmed_df.activation_date))
     
-    features_to_drop = ["Unnamed: 0", "item_id", "city", "param_2", "param_3", "item_seq_number", "image_top_1", "user_id", "activation_date"]
+    features_to_drop = ["item_id", "city", "param_2", "param_3", "item_seq_number", "image_top_1", "user_id", "activation_date"]
     trimmed_df = trimmed_df.drop(features_to_drop, axis=1)
     return trimmed_df
 
