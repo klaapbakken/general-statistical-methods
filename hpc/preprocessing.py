@@ -53,7 +53,7 @@ def change_data_representation(df, feature_to_index_maps, data_folder, image_fol
                        param_1_index = df.param_1.map(feature_to_index_maps[3]),
                        user_type_index = df.user_type.map(feature_to_index_maps[4]),
                        image_path = df.image + ".jpg",
-                       days_since_activation_num = df.days_since_activation.str.slice(0,2).astype(int)
+                       days_since_activation_num = df.days_since_activation.astype(int)
                       )
     
     num_df.fillna({"param_1_index" : 0,
