@@ -162,3 +162,14 @@ val_title_array = pad_sequences(val_title, maxlen=maximum_title)
 
 train_desc_array = pad_sequences(train_title, maxlen=maximum_desc)
 val_desc_array = pad_sequences(val_title, maxlen=maximum_desc)
+
+train_X = sparse.hstack((train_cat_X, train_num_X)).tocsr()
+val_X = sparse.hstack((val_cat_X, val_num_X)).tocsr()
+
+train_X, train_y = shuffle(train_X, train_y)
+
+val_X, val_y = shuffle(val_X, val_y)
+
+print(train_X.shape, val_X.shape)
+print(train_title_array.shape, val_title_array.shape)
+print(train_desc_array.shape, val_desc_array.shape)
