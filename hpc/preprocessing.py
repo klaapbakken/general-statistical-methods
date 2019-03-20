@@ -142,7 +142,7 @@ val_num_X = scaler.transform(val_num_X)
 val_y = val_df.deal_probability.values
 
 train_text_df = train_df.assign(td = train_df.title + train_df.description)
-vocabulary = train_df.td.values
+vocabulary = train_text_df.td.values
 
 tokenizer = Tokenizer(num_words=10000)
 tokenizer.fit_on_texts(vocabulary)
