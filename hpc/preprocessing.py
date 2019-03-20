@@ -92,7 +92,7 @@ def get_feature_to_index_maps(df):
             param_1_index_mapping, user_type_index_mapping]
 
 def create_one_hot_encoder(df):
-    one_hot_enc = OneHotEncoder(categories="auto", handle_unknown="ignore")
+    one_hot_enc = OneHotEncoder(handle_unknown="ignore")
     categorical_columns = ["category_index", "region_index", "parent_category_index",\
                           "param_1_index", "user_type_index"]
     one_hot_enc.fit(df[categorical_columns])
