@@ -114,7 +114,7 @@ with open(os.path.join(os.pardir, "train_image_path.txt"), 'r') as f:
     train_image_folder_path = f.readline().rstrip("\n")
     f.close()
 
-data_folder = os.path.abspath(os.path.join(os.path.dirname(os.curdir), "data", "external"))
+data_folder = os.path.abspath(os.path.join(os.path.dirname(os.curdir), "data"))
 
 raw_df = trim_dataframe(pd.read_csv(train_path))
 
