@@ -172,3 +172,10 @@ val_X, val_y = shuffle(val_X, val_y)
 print(train_X.shape, val_X.shape)
 print(train_title_array.shape, val_title_array.shape)
 print(train_desc_array.shape, val_desc_array.shape)
+
+np.save(os.path.join(data_folder, "processed", "train_X.npy"), train_X)
+np.save(os.path.join(data_folder, "processed" , "train_y.npy"), train_y)
+
+np.save(os.path.join(data_folder, "processed" , "val_X.npy"), val_X)
+np.save(os.path.join(data_folder, "processed" ," val_y.npy"), val_y)
+
