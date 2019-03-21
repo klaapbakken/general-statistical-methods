@@ -95,7 +95,7 @@ for layer in inceptionv3_model.layers:
     layer.trainable = False
 
 image_input = inceptionv3_model.input
-image_output = Flatten()(image_input)
+image_output = Flatten()(inceptionv3_model.output)
 image_output = Dense(1024, activation="relu")(image_output)
 
 output = Concatenate()([dense_output, image_output])
