@@ -69,6 +69,34 @@ val_image_generator = image_generator.flow_from_dataframe(
     batch_size=32)
 
 train_generator = data_generator(train_image_generator, train_X, train_title, train_desc)
-val_generator = data_generator(val_image_generator, train_X, train_title, train_desc)
+val_generator = data_generator(val_image_generator, val_X, val_title, val_desc)
+
+#Neural network
+
+inputs = Input(shape=(train_X.shape[1], ))
+outputs = Dropout(0.2)(inputs)
+outputs = Dense(1024, activation="relu")(outputs)
+outputs = BatchNormalization()(outputs)
+outputs = Dropout(0.3)(outputs)
+outputs = Dense(256, activation="relu")(outputs)
+outputs = Dropout(0.3)(outputs)
+outputs = BatchNormalization()(outputs)
+outputs = Dense(128, activation="relu")(outputs)
+outputs = BatchNormalization()(outputs)
+outputs = Dense(128, activation="relu")(outputs)
+outputs = BatchNormalization()(outputs)
+outputs = Dense(64, activation="relu")(outputs)
+outputs = BatchNormalization()(outputs)
+outputs = Dense(32, activation="relu")(outputs)
+outputs = BatchNormalization()(outputs)
+outputs = Dense(16, activation="relu")(outputs)
+outputs = BatchNormalization()(outputs)
+outputs = Dense(1, activation="sigmoid")(outputs)
+
+model = Model(inputs, outputs)
+model.compile(optimizer="Adam", loss=keras_rmse, metrics=[keras_rmse, "mean_squared_error"])
+history = model.fit(train_X, train_df.deal_probability, batch_size=1024, epochs=20,
+                    validation_data=(val_df.deal_probability, val_y),
+                   callbacks=[EarlyStopping()])
 
 
