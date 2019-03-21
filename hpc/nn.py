@@ -6,7 +6,7 @@ import keras
 import sys
 
 from keras.preprocessing.image import ImageDataGenerator
-from keras.applications.inception_v3 import InceptionV3
+from keras.applications.mobilenet_v2 import MobileNetV2
 from keras.layers import Dense, Flatten, Embedding, Input, Dropout, Concatenate, BatchNormalization, CuDNNGRU
 from keras.models import Model
 from keras.optimizers import Adam, SGD, RMSprop
@@ -50,9 +50,9 @@ train_image_generator = image_generator.flow_from_dataframe(
     x_col="image_path",
     y_col="deal_probability",
     class_mode='other',
-    target_size=(299, 299),
+    target_size=(224, 224),
     color_mode='rgb',
-    batch_size=256)
+    batch_size=128)
 
 val_image_generator = image_generator.flow_from_dataframe(
     dataframe=val_df,
@@ -60,9 +60,9 @@ val_image_generator = image_generator.flow_from_dataframe(
     x_col="image_path",
     y_col="deal_probability",
     class_mode='other',
-    target_size=(299, 299),
+    target_size=(224, 224),
     color_mode='rgb',
-    batch_size=256)
+    batch_size=128)
 
 train_generator = data_generator(train_image_generator, train_X, train_title, train_desc)
 val_generator = data_generator(val_image_generator, val_X, val_title, val_desc)
@@ -90,12 +90,12 @@ desc_embedding_layer = Embedding(1000, 32, input_length=train_desc.shape[1])(des
 desc_rnn_output = CuDNNGRU(64)(desc_embedding_layer)
 desc_rnn_output = BatchNormalization()(desc_rnn_output)
 
-inceptionv3_model = InceptionV3(input_shape=(299, 299, 3), include_top=False, pooling="max")
-for layer in inceptionv3_model.layers:
+image_model = MobileNetV2(input_shape=(224, 224, 3), include_top=False)
+for layer in image_model.layers:
     layer.trainable = False
 
-image_input = inceptionv3_model.input
-image_output = Dense(256, activation="relu")(inceptionv3_model.output)
+image_input = image_model.input
+image_output = Dense(128, activation="relu")(image_model.output)
 
 output = Concatenate()([dense_output, title_rnn_output, desc_rnn_output, image_output])
 output = Dense(256, activation="relu")(output)
@@ -114,9 +114,9 @@ model.compile(optimizer="Adam", loss=keras_rmse, metrics=[keras_rmse, "mean_squa
 print(model.summary())
 history = model.fit_generator(
     train_generator,
-    steps_per_epoch = np.ceil(train_X.shape[0] / 256),
+    steps_per_epoch = np.ceil(train_X.shape[0] / 128),
     validation_data = val_generator,
-    validation_steps = np.ceil(val_X.shape[0] / 256),
+    validation_steps = np.ceil(val_X.shape[0] / 128),
     callbacks = [EarlyStopping()],
     epochs = 10
 )
