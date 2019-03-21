@@ -17,22 +17,16 @@ from scipy import sparse
 def data_generator(image_generator, X, X_title, X_desc):
     index_generator = image_generator.index_generator
     for indices, images in zip(index_generator, image_generator):
-        yield (X[indices, :], X_title[indices, :], X_desc[indices, :], images[0]), images[1]
+        yield [[X[indices, :], X_title[indices, :], X_desc[indices, :], images[0]], images[1]]
 
 def keras_rmse(y_true, y_pred):
     return K.sqrt(K.mean(K.square(y_pred - y_true)))
-
 
 with open(os.path.join(os.pardir, "train_image_path.txt"), 'r') as f:
     image_folder = f.readline().rstrip("\n")
     f.close()
 
 data_folder = os.path.abspath(os.path.join(os.pardir, "data"))
-
-def data_generator(image_generator, X, X_title, X_desc):
-    index_generator = image_generator.index_generator
-    for indices, images in zip(index_generator, image_generator):
-        yield (images[0], X[indices, :], X_title[indices, :], X_desc[indices, :]), images[1]
 
 train_X = sparse.load_npz(os.path.join(data_folder, "processed", "train_X.npz"))
 val_X = sparse.load_npz(os.path.join(data_folder, "processed", "val_X.npz"))
