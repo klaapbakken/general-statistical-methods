@@ -12,6 +12,8 @@ from keras.models import Model
 from keras.optimizers import Adam, SGD, RMSprop
 from keras import backend as K
 from keras.callbacks import EarlyStopping
+from keras.models import load_model
+from keras.utils import plot_model
 
 from scipy import sparse
 
@@ -118,5 +120,7 @@ history = model.fit_generator(
     validation_data = val_generator,
     validation_steps = np.ceil(val_X.shape[0] / 128),
     callbacks = [EarlyStopping()],
-    epochs = 10
+    epochs = 5
 )
+
+model.save("trained_model.h5")
