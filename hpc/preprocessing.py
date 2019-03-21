@@ -124,17 +124,15 @@ train_cat_X = one_hot_encode(train_df, enc)
 train_num_X = train_df[numerical_features].values
 scaler.fit(train_num_X)
 train_num_X = scaler.transform(train_num_X)
-train_y = train_df.deal_probability.values
 
 val_cat_X = one_hot_encode(val_df, enc)
 val_num_X = val_df[numerical_features]
 val_num_X = scaler.transform(val_num_X)
-val_y = val_df.deal_probability.values
 
 train_text_df = train_df.assign(td = train_df.title + train_df.description)
 vocabulary = train_text_df.td.values
 
-tokenizer = Tokenizer(num_words=10000)
+tokenizer = Tokenizer(num_words=1000)
 tokenizer.fit_on_texts(vocabulary)
 
 train_title = tokenizer.texts_to_sequences(train_df["title"].values)
@@ -160,14 +158,10 @@ print(train_title_array.shape, val_title_array.shape)
 print(train_desc_array.shape, val_desc_array.shape)
 
 sparse.save_npz(os.path.join(data_folder, "processed", "train_X.npz"), train_X)
-sparse.save_npz(os.path.join(data_folder, "processed" , "train_y.npz"), train_y)
-
 np.save(os.path.join(data_folder, "processed", "train_title.npy"), train_title_array)
 np.save(os.path.join(data_folder, "processed", "train_desc.npy"), train_desc_array)
 
-np.save(os.path.join(data_folder, "processed" , "val_X.npy"), val_X)
-np.save(os.path.join(data_folder, "processed" ," val_y.npy"), val_y)
-
+sparse.save_npz(os.path.join(data_folder, "processed", "val_X.npz"), val_X)
 np.save(os.path.join(data_folder, "processed" , "val_title.npy"), val_title_array)
 np.save(os.path.join(data_folder, "processed" , "val_desc.npy"), val_desc_array)
 
