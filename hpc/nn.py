@@ -95,7 +95,8 @@ for layer in image_model.layers:
     layer.trainable = False
 
 image_input = image_model.input
-image_output = Dense(128, activation="relu")(image_model.output)
+image_output = Flatten()(image_model.output)
+image_output = Dense(128, activation="relu")(image_output)
 
 output = Concatenate()([dense_output, title_rnn_output, desc_rnn_output, image_output])
 output = Dense(256, activation="relu")(output)
@@ -111,7 +112,7 @@ output = Dense(1, activation="sigmoid")(output)
 model = Model([dense_input, title_input, desc_input, image_input], output)
 model.compile(optimizer="Adam", loss=keras_rmse, metrics=[keras_rmse, "mean_squared_error"])
 
-print(model.summary())
+model.summary()
 history = model.fit_generator(
     train_generator,
     steps_per_epoch = np.ceil(train_X.shape[0] / 128),
