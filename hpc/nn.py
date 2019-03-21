@@ -96,7 +96,6 @@ for layer in inceptionv3_model.layers:
 
 image_input = inceptionv3_model.input
 image_output = Dense(256, activation="relu")(inceptionv3_model.output)
-image_output = Flatten()(image_output)
 
 output = Concatenate()([dense_output, title_rnn_output, desc_rnn_output, image_output])
 output = Dense(256, activation="relu")(output)
