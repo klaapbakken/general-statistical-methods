@@ -70,7 +70,7 @@ for test1 in next(train_generator):
     for test2 in test1:
         print(type(test2))
         try:
-            print(type2.shape)
+            print(test2.shape)
         except:
             print("Not ndarray")
 sys.exit()
