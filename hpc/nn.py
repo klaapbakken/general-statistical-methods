@@ -6,7 +6,7 @@ import keras
 import sys
 
 from keras.preprocessing.image import ImageDataGenerator
-from keras.applications.mobilenet_v2 import MobileNetV2
+from keras.applications.mobilenet import MobileNet
 from keras.layers import Dense, Flatten, Embedding, Input, Dropout, Concatenate, BatchNormalization, CuDNNGRU
 from keras.models import Model
 from keras.optimizers import Adam, SGD, RMSprop
@@ -90,7 +90,7 @@ desc_embedding_layer = Embedding(1000, 32, input_length=train_desc.shape[1])(des
 desc_rnn_output = CuDNNGRU(64)(desc_embedding_layer)
 desc_rnn_output = BatchNormalization()(desc_rnn_output)
 
-image_model = MobileNetV2(input_shape=(224, 224, 3), include_top=False)
+image_model = MobileNet(input_shape=(224, 224, 3), include_top=False)
 for layer in image_model.layers:
     layer.trainable = False
 
