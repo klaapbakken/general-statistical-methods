@@ -6,7 +6,7 @@ import keras
 import sys
 
 from keras.preprocessing.image import ImageDataGenerator
-from keras.applications.resnet_v2 import ResNet50V2
+from keras.applications.inception_v3 import InceptionV3
 from keras.layers import Dense, Flatten, Embedding, Input, Dropout, Concatenate, BatchNormalization, CuDNNGRU
 from keras.models import Model
 from keras.optimizers import Adam, SGD, RMSprop
@@ -50,7 +50,7 @@ train_image_generator = image_generator.flow_from_dataframe(
     x_col="image_path",
     y_col="deal_probability",
     class_mode='other',
-    target_size=(224, 224),
+    target_size=(299, 299),
     color_mode='rgb',
     batch_size=256)
 
@@ -60,7 +60,7 @@ val_image_generator = image_generator.flow_from_dataframe(
     x_col="image_path",
     y_col="deal_probability",
     class_mode='other',
-    target_size=(224, 224),
+    target_size=(299, 299),
     color_mode='rgb',
     batch_size=256)
 
@@ -90,12 +90,12 @@ desc_embedding_layer = Embedding(1000, 32, input_length=train_desc.shape[1])(des
 desc_rnn_output = CuDNNGRU(64)(desc_embedding_layer)
 desc_rnn_output = BatchNormalization()(desc_rnn_output)
 
-resnet50v2_model = ResNet50V2(input_shape=(224, 224, 3), include_top=False)
-for layer in resnet50v2_model.layers:
+inceptionv3_model = InceptionV3(input_shape=(299, 299, 3), include_top=False)
+for layer in inceptionv3_model.layers:
     layer.trainable = False
 
-image_input = resnet50v2_model.input
-image_output = Flatten()(resnet50v2_model.output)
+image_input = inceptionv3_model.input
+image_output = Flatten()(inceptionv3_model.output)
 image_output = Dense(512, activation="relu")(image_output)
 
 output = Concatenate()([dense_output, title_rnn_output, desc_rnn_output, image_output])
