@@ -66,9 +66,13 @@ val_image_generator = image_generator.flow_from_dataframe(
 train_generator = data_generator(train_image_generator, train_X, train_title, train_desc)
 val_generator = data_generator(val_image_generator, val_X, val_title, val_desc)
 
-for test1 in train_generator:
+for test1 in next(train_generator):
     for test2 in test1:
         print(type(test2))
+        try:
+            print(type2.shape)
+        except:
+            print("Not ndarray")
 sys.exit()
 
 #Neural network
