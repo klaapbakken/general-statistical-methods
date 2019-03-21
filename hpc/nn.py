@@ -100,7 +100,7 @@ for layer in vgg16_model.layers:
 
 image_input = vgg16_model.input
 image_output = Flatten()(vgg16_model.output)
-image_output = Dense(512, activation="relu")(image_model)
+image_output = Dense(512, activation="relu")(image_output)
 
 output = Concatenate()([dense_output, title_rnn_output, desc_rnn_output, image_output])
 output = Dense(512, activation="relu")(output)
