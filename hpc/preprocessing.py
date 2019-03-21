@@ -6,21 +6,11 @@ import keras
 
 from PIL import Image
 
-from keras.preprocessing.image import ImageDataGenerator
-from keras.applications.vgg16 import VGG16, decode_predictions
-from keras.layers import Dense, Flatten, Embedding, Input, Dropout, Concatenate, BatchNormalization, CuDNNGRU
-from keras.models import Model
-from keras.optimizers import Adam, SGD, RMSprop
-from keras import backend as K
-from keras.callbacks import EarlyStopping
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import Normalizer
-from sklearn.utils import shuffle
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.feature_selection import SelectFromModel
 from sklearn.model_selection import train_test_split
 
 from scipy import sparse
@@ -164,10 +154,6 @@ val_desc_array = pad_sequences(val_title, maxlen=maximum_desc)
 
 train_X = sparse.hstack((train_cat_X, train_num_X)).tocsr()
 val_X = sparse.hstack((val_cat_X, val_num_X)).tocsr()
-
-train_X, train_y = shuffle(train_X, train_y)
-
-val_X, val_y = shuffle(val_X, val_y)
 
 print(train_X.shape, val_X.shape)
 print(train_title_array.shape, val_title_array.shape)
