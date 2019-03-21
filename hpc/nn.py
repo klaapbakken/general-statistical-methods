@@ -96,7 +96,7 @@ outputs = Dense(1, activation="sigmoid")(outputs)
 model = Model(inputs, outputs)
 model.compile(optimizer="Adam", loss=keras_rmse, metrics=[keras_rmse, "mean_squared_error"])
 history = model.fit(train_X, train_df.deal_probability, batch_size=1024, epochs=20,
-                    validation_data=(val_df.deal_probability, val_y),
+                    validation_data=(val_X, val_df.deal_probability),
                    callbacks=[EarlyStopping()])
 
 
