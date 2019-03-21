@@ -18,7 +18,7 @@ from scipy import sparse
 def data_generator(image_generator, X, X_title, X_desc):
     index_generator = image_generator.index_generator
     for indices, images in zip(index_generator, image_generator):
-        yield [[X[indices, :], X_title[indices, :], X_desc[indices, :], images[0]], images[1]]
+        yield [[X[indices, :], X_title[indices, :], X_desc[indices, :], images[0]], np.array(images[1])]
 
 def keras_rmse(y_true, y_pred):
     return K.sqrt(K.mean(K.square(y_pred - y_true)))
