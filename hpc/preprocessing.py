@@ -176,6 +176,16 @@ print(train_desc_array.shape, val_desc_array.shape)
 np.save(os.path.join(data_folder, "processed", "train_X.npy"), train_X)
 np.save(os.path.join(data_folder, "processed" , "train_y.npy"), train_y)
 
+np.save(os.path.join(data_folder, "processed", "train_title.npy"), train_title_array)
+np.save(os.path.join(data_folder, "processed", "train_desc.npy"), train_desc_array)
+
 np.save(os.path.join(data_folder, "processed" , "val_X.npy"), val_X)
 np.save(os.path.join(data_folder, "processed" ," val_y.npy"), val_y)
+
+np.save(os.path.join(data_folder, "processed" , "val_title.npy"), val_title_array)
+np.save(os.path.join(data_folder, "processed" , "val_desc.npy"), val_desc_array)
+
+train_df[["image_path", "deal_probability"]].to_csv(os.path.join(data_folder, "processed" , "train_image_df"))
+val_df[["image_path", "deal_probability"]].to_csv(os.path.join(data_folder, "processed" , "val_image_df"))
+
 
