@@ -115,11 +115,13 @@ output = Dense(1, activation="sigmoid")(output)
 
 model = Model([dense_input, image_input], output)
 model.compile(optimizer="Adam", loss=keras_rmse, metrics=[keras_rmse, "mean_squared_error"])
-history = model.fit_generator(
-    train_generator,
-    steps_per_epoch = np.ceil(train_X.shape[0] / 256),
-    validation_data = val_generator,
-    validation_steps = np.ceil(val_X.shape[0] / 256),
-    callbacks = [EarlyStopping()],
-    epochs = 10
-)
+
+print(model.summary())
+#history = model.fit_generator(
+#    train_generator,
+#    steps_per_epoch = np.ceil(train_X.shape[0] / 256),
+#    validation_data = val_generator,
+#    validation_steps = np.ceil(val_X.shape[0] / 256),
+#    callbacks = [EarlyStopping()],
+#    epochs = 10
+#)
