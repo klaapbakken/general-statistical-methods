@@ -45,6 +45,6 @@ train_df = pd.read_csv(os.path.join(data_folder, "processed", "train_image_df.cs
 val_df = pd.read_csv(os.path.join(data_folder, "processed", "val_image_df.csv"))
 
 print(train_X.shape, val_X.shape)
-print(train_title_array.shape, val_title_array.shape)
-print(train_desc_array.shape, val_desc_array.shape)
+print(train_title.shape, val_title.shape)
+print(train_desc.shape, val_desc.shape)
 print(len(train_df), len(val_df))
