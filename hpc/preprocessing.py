@@ -185,7 +185,7 @@ np.save(os.path.join(data_folder, "processed" ," val_y.npy"), val_y)
 np.save(os.path.join(data_folder, "processed" , "val_title.npy"), val_title_array)
 np.save(os.path.join(data_folder, "processed" , "val_desc.npy"), val_desc_array)
 
-train_df[["image_path", "deal_probability"]].to_csv(os.path.join(data_folder, "processed" , "train_image_df"))
-val_df[["image_path", "deal_probability"]].to_csv(os.path.join(data_folder, "processed" , "val_image_df"))
+train_df[["image_path", "deal_probability"]].to_csv(os.path.join(data_folder, "processed" , "train_image_df.csv"))
+val_df[["image_path", "deal_probability"]].to_csv(os.path.join(data_folder, "processed" , "val_image_df.csv"))
 
 
