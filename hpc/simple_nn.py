@@ -26,8 +26,8 @@ val_X = sparse.load_npz(os.path.join(data_folder, "processed", "val_X.npz")).toa
 train_df = pd.read_csv(os.path.join(data_folder, "processed", "train_image_df.csv"))
 val_df = pd.read_csv(os.path.join(data_folder, "processed", "val_image_df.csv"))
 
-train_y = train_df.deal_probabilties.values
-val_y = val_df.deal_probabilties.values
+train_y = train_df.deal_probability.values
+val_y = val_df.deal_probability.values
 
 inputs = Input(shape=(train_X.shape[1], ))
 outputs = Dropout(0.2)(inputs)
