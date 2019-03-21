@@ -6,7 +6,7 @@ import keras
 import sys
 
 from keras.preprocessing.image import ImageDataGenerator
-from keras.applications.vgg16 import VGG16, decode_predictions
+from keras.applications.resnet_v2 import ResNet50V2
 from keras.layers import Dense, Flatten, Embedding, Input, Dropout, Concatenate, BatchNormalization, CuDNNGRU
 from keras.models import Model
 from keras.optimizers import Adam, SGD, RMSprop
@@ -52,7 +52,7 @@ train_image_generator = image_generator.flow_from_dataframe(
     class_mode='other',
     target_size=(224, 224),
     color_mode='rgb',
-    batch_size=32)
+    batch_size=256)
 
 val_image_generator = image_generator.flow_from_dataframe(
     dataframe=val_df,
@@ -62,7 +62,7 @@ val_image_generator = image_generator.flow_from_dataframe(
     class_mode='other',
     target_size=(224, 224),
     color_mode='rgb',
-    batch_size=32)
+    batch_size=256)
 
 train_generator = data_generator(train_image_generator, train_X, train_title, train_desc)
 val_generator = data_generator(val_image_generator, val_X, val_title, val_desc)
@@ -90,12 +90,12 @@ desc_embedding_layer = Embedding(1000, 32, input_length=train_desc.shape[1])(des
 desc_rnn_output = CuDNNGRU(64)(desc_embedding_layer)
 desc_rnn_output = BatchNormalization()(desc_rnn_output)
 
-vgg16_model = VGG16(input_shape=(224, 224, 3), include_top=False)
-for layer in vgg16_model.layers:
+resnet50v2_model = ResNet50V2(input_shape=(224, 224, 3), include_top=False)
+for layer in resnet50v2_model.layers:
     layer.trainable = False
 
-image_input = vgg16_model.input
-image_output = Flatten()(vgg16_model.output)
+image_input = resnet50v2_model.input
+image_output = Flatten()(resnet50v2_model.output)
 image_output = Dense(512, activation="relu")(image_output)
 
 output = Concatenate()([dense_output, title_rnn_output, desc_rnn_output, image_output])
