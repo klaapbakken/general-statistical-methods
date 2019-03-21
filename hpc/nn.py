@@ -13,7 +13,6 @@ from keras.optimizers import Adam, SGD, RMSprop
 from keras import backend as K
 from keras.callbacks import EarlyStopping
 from keras.models import load_model
-from keras.utils import plot_model
 
 from scipy import sparse
 
