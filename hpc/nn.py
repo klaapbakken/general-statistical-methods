@@ -90,12 +90,13 @@ dense_output = BatchNormalization()(dense_output)
 #desc_rnn_output = CuDNNGRU(64)(desc_embedding_layer)
 #desc_rnn_output = BatchNormalization()(desc_rnn_output)
 
-inceptionv3_model = InceptionV3(input_shape=(299, 299, 3), include_top=False, pooling="max")
-for layer in inceptionv3_model.layers[:-1]:
+inceptionv3_model = InceptionV3(input_shape=(299, 299, 3), include_top=False)
+for layer in inceptionv3_model.layers:
     layer.trainable = False
 
 image_input = inceptionv3_model.input
-image_output = Dense(1024, activation="relu")(image_input)
+image_output = Flatten()(image_input)
+image_output = Dense(1024, activation="relu")(image_output)
 
 output = Concatenate()([dense_output, image_output])
 output = Dense(512, activation="relu")(output)
