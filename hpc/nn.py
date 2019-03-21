@@ -46,7 +46,29 @@ val_desc = np.load(os.path.join(data_folder, "processed", "val_desc.npy"))
 train_df = pd.read_csv(os.path.join(data_folder, "processed", "train_image_df.csv"))
 val_df = pd.read_csv(os.path.join(data_folder, "processed", "val_image_df.csv"))
 
-print(train_X.shape, val_X.shape)
-print(train_title.shape, val_title.shape)
-print(train_desc.shape, val_desc.shape)
-print(len(train_df), len(val_df))
+image_generator = ImageDataGenerator()
+
+train_image_generator = image_generator.flow_from_dataframe(
+    dataframe=train_df,
+    directory=image_folder,
+    x_col="image_path",
+    y_col="deal_probability",
+    class_mode='other',
+    target_size=(224, 224),
+    color_mode='rgb',
+    batch_size=32)
+
+val_image_generator = image_generator.flow_from_dataframe(
+    dataframe=val_df,
+    directory=image_folder,
+    x_col="image_path",
+    y_col="deal_probability",
+    class_mode='other',
+    target_size=(224, 224),
+    color_mode='rgb',
+    batch_size=32)
+
+train_generator = data_generator(train_image_generator, train_X, train_title, train_desc)
+val_generator = data_generator(val_image_generator, train_X, train_title, train_desc)
+
+
