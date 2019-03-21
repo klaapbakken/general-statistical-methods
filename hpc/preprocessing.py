@@ -132,7 +132,7 @@ val_num_X = scaler.transform(val_num_X)
 train_text_df = train_df.assign(td = train_df.title + train_df.description)
 vocabulary = train_text_df.td.values
 
-tokenizer = Tokenizer(num_words=1000)
+tokenizer = Tokenizer(num_words=2500)
 tokenizer.fit_on_texts(vocabulary)
 
 train_title = tokenizer.texts_to_sequences(train_df["title"].values)
@@ -152,10 +152,6 @@ val_desc_array = pad_sequences(val_title, maxlen=maximum_desc)
 
 train_X = sparse.hstack((train_cat_X, train_num_X)).tocsr()
 val_X = sparse.hstack((val_cat_X, val_num_X)).tocsr()
-
-print(train_X.shape, val_X.shape)
-print(train_title_array.shape, val_title_array.shape)
-print(train_desc_array.shape, val_desc_array.shape)
 
 sparse.save_npz(os.path.join(data_folder, "processed", "train_X.npz"), train_X)
 np.save(os.path.join(data_folder, "processed", "train_title.npy"), train_title_array)
