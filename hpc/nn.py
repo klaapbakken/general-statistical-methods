@@ -19,7 +19,7 @@ def data_generator(image_generator, X, X_title, X_desc):
     index_generator = image_generator.index_generator
     for images, targets in image_generator:
         indices = next(index_generator)
-        yield [X[indices, :], X_title[indices, :], X_desc[indices, :], images], targets
+        yield [X[indices, :].toarray(), X_title[indices, :], X_desc[indices, :], images], targets
 
 def keras_rmse(y_true, y_pred):
     return K.sqrt(K.mean(K.square(y_pred - y_true)))
