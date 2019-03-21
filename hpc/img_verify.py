@@ -47,3 +47,4 @@ for path in val_df.image_path.values:
 
 
 corrupt_df = pd.DataFrame({"corrupt_path" : np.array(invalid)})
+corrupt_df.to_csv(os.path.join(data_folder, "external", "corrupt_files.csv"))
