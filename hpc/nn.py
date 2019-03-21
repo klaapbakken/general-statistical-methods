@@ -96,7 +96,7 @@ for layer in image_model.layers:
     layer.trainable = False
 
 image_input = image_model.input
-image_output = Flatten()(image_input)
+image_output = Flatten()(image_model.output)
 image_output = Dense(32, activation="relu")(image_output)
 
 output = Concatenate()([dense_output, title_rnn_output, desc_rnn_output, image_output])
