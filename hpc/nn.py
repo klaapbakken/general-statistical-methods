@@ -17,8 +17,9 @@ from scipy import sparse
 
 def data_generator(image_generator, X, X_title, X_desc):
     index_generator = image_generator.index_generator
-    for indices, images in zip(index_generator, image_generator):
-        yield [[X[indices, :], X_title[indices, :], X_desc[indices, :], images[0]], np.array(images[1])]
+    for images, targets in image_generator:
+        indices = next(index_generator)
+        yield [X[indices, :], X_title[indices, :], X_desc[indices, :], images], targets
 
 def keras_rmse(y_true, y_pred):
     return K.sqrt(K.mean(K.square(y_pred - y_true)))
@@ -65,15 +66,6 @@ val_image_generator = image_generator.flow_from_dataframe(
 
 train_generator = data_generator(train_image_generator, train_X, train_title, train_desc)
 val_generator = data_generator(val_image_generator, val_X, val_title, val_desc)
-
-for test1 in next(train_generator):
-    for test2 in test1:
-        print(type(test2))
-        try:
-            print(test2.shape)
-        except:
-            print("Not ndarray")
-sys.exit()
 
 #Neural network
 
