@@ -15,11 +15,11 @@ from keras.callbacks import EarlyStopping
 
 from scipy import sparse
 
-def data_generator(image_generator, X, X_title, X_desc):
+def data_generator(image_generator, X):
     index_generator = image_generator.index_generator
     for images, targets in image_generator:
         indices = next(index_generator)
-        yield [X[indices, :].toarray(), X_title[indices, :], X_desc[indices, :], images], targets
+        yield [X[indices, :].toarray(), images], targets
 
 def keras_rmse(y_true, y_pred):
     return K.sqrt(K.mean(K.square(y_pred - y_true)))
@@ -64,8 +64,8 @@ val_image_generator = image_generator.flow_from_dataframe(
     color_mode='rgb',
     batch_size=256)
 
-train_generator = data_generator(train_image_generator, train_X, train_title, train_desc)
-val_generator = data_generator(val_image_generator, val_X, val_title, val_desc)
+train_generator = data_generator(train_image_generator, train_X)
+val_generator = data_generator(val_image_generator, val_X)
 
 #Neural network
 
@@ -80,25 +80,24 @@ dense_output = BatchNormalization()(dense_output)
 dense_output = Dense(128, activation="relu")(dense_output)
 dense_output = BatchNormalization()(dense_output)
 
-title_input = Input(shape=(train_title.shape[1], ))
-title_embedding_layer = Embedding(1000, 32, input_length=train_title.shape[1])(title_input)
-title_rnn_output = CuDNNGRU(64)(title_embedding_layer)
-title_rnn_output = BatchNormalization()(title_rnn_output)
+#title_input = Input(shape=(train_title.shape[1], ))
+#title_embedding_layer = Embedding(1000, 32, input_length=train_title.shape[1])(title_input)
+#title_rnn_output = CuDNNGRU(64)(title_embedding_layer)
+#title_rnn_output = BatchNormalization()(title_rnn_output)
 
-desc_input = Input(shape=(train_desc.shape[1], ))
-desc_embedding_layer = Embedding(1000, 32, input_length=train_desc.shape[1])(desc_input)
-desc_rnn_output = CuDNNGRU(64)(desc_embedding_layer)
-desc_rnn_output = BatchNormalization()(desc_rnn_output)
+#desc_input = Input(shape=(train_desc.shape[1], ))
+#desc_embedding_layer = Embedding(1000, 32, input_length=train_desc.shape[1])(desc_input)
+#desc_rnn_output = CuDNNGRU(64)(desc_embedding_layer)
+#desc_rnn_output = BatchNormalization()(desc_rnn_output)
 
-inceptionv3_model = InceptionV3(input_shape=(299, 299, 3), include_top=False)
-for layer in inceptionv3_model.layers:
+inceptionv3_model = InceptionV3(input_shape=(299, 299, 3), include_top=False, pooling="max")
+for layer in inceptionv3_model.layers[:-1]:
     layer.trainable = False
 
 image_input = inceptionv3_model.input
-image_output = Flatten()(inceptionv3_model.output)
-image_output = Dense(512, activation="relu")(image_output)
+image_output = Dense(1024, activation="relu")(image_output)
 
-output = Concatenate()([dense_output, title_rnn_output, desc_rnn_output, image_output])
+output = Concatenate()([dense_output, image_output])
 output = Dense(512, activation="relu")(output)
 output = BatchNormalization()(output)
 output = Dense(256, activation="relu")(output)
@@ -113,7 +112,7 @@ output = Dense(16, activation="relu")(output)
 output = BatchNormalization()(output)
 output = Dense(1, activation="sigmoid")(output)
 
-model = Model([dense_input, title_input, desc_input, image_input], output)
+model = Model([dense_input, image_input], output)
 model.compile(optimizer="Adam", loss=keras_rmse, metrics=[keras_rmse, "mean_squared_error"])
 history = model.fit_generator(
     train_generator,
