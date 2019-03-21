@@ -159,8 +159,8 @@ print(train_X.shape, val_X.shape)
 print(train_title_array.shape, val_title_array.shape)
 print(train_desc_array.shape, val_desc_array.shape)
 
-np.save(os.path.join(data_folder, "processed", "train_X.npy"), train_X)
-np.save(os.path.join(data_folder, "processed" , "train_y.npy"), train_y)
+sparse.save_npz(os.path.join(data_folder, "processed", "train_X.npz"), train_X)
+sparse.save_npz(os.path.join(data_folder, "processed" , "train_y.npz"), train_y)
 
 np.save(os.path.join(data_folder, "processed", "train_title.npy"), train_title_array)
 np.save(os.path.join(data_folder, "processed", "train_desc.npy"), train_desc_array)

@@ -12,12 +12,6 @@ from keras.optimizers import Adam, SGD, RMSprop
 from keras import backend as K
 from keras.callbacks import EarlyStopping
 
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.preprocessing import Normalizer
-from sklearn.utils import shuffle
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.feature_selection import SelectFromModel
-
 from scipy import sparse
 
 
@@ -32,8 +26,8 @@ def data_generator(image_generator, X, X_title, X_desc):
     for indices, images in zip(index_generator, image_generator):
         yield (images[0], X[indices, :], X_title[indices, :], X_desc[indices, :]), images[1]
 
-train_X = np.load(os.path.join(data_folder, "processed", "train_X.npy"))
-val_X = np.load(os.path.join(data_folder, "processed", "val_X.npy"))
+train_X = sparse.load_npz(os.path.join(data_folder, "processed", "train_X.npz"))
+val_X = sparse.load_npz(os.path.join(data_folder, "processed", "val_X.npz"))
 
 train_title = np.load(os.path.join(data_folder, "processed", "train_title.npy"))
 val_title = np.load(os.path.join(data_folder, "processed", "val_title.npy"))
