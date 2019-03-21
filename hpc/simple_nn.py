@@ -30,7 +30,7 @@ train_y = train_df.deal_probability.values
 val_y = val_df.deal_probability.values
 
 inputs = Input(shape=(train_X.shape[1], ))
-outputs = Dense(64, activation="relu")(outputs)
+outputs = Dense(64, activation="relu")(inputs)
 outputs = BatchNormalization()(outputs)
 outputs = Dense(32, activation="relu")(outputs)
 outputs = Dropout(0.3)(outputs)
