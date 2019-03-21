@@ -95,7 +95,7 @@ desc_rnn_output = CuDNNGRU(64)(desc_embedding_layer)
 desc_rnn_output = BatchNormalization()(desc_rnn_output)
 
 vgg16_model = VGG16(input_shape=(224, 224, 3), include_top=False)
-for layer in vgg16_model:
+for layer in vgg16_model.layers:
     layer.trainable = False
 
 image_input = vgg16_model.input
