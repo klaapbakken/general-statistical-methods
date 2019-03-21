@@ -17,7 +17,7 @@ from scipy import sparse
 def data_generator(image_generator, X, X_title, X_desc):
     index_generator = image_generator.index_generator
     for indices, images in zip(index_generator, image_generator):
-        yield (images[0], X[indices, :], X_title[indices, :], X_desc[indices, :]), images[1]
+        yield (X[indices, :], X_title[indices, :], X_desc[indices, :], images[0]), images[1]
 
 def keras_rmse(y_true, y_pred):
     return K.sqrt(K.mean(K.square(y_pred - y_true)))
@@ -73,30 +73,57 @@ val_generator = data_generator(val_image_generator, val_X, val_title, val_desc)
 
 #Neural network
 
-inputs = Input(shape=(train_X.shape[1], ))
-outputs = Dropout(0.2)(inputs)
-outputs = Dense(1024, activation="relu")(outputs)
-outputs = BatchNormalization()(outputs)
-outputs = Dropout(0.3)(outputs)
-outputs = Dense(256, activation="relu")(outputs)
-outputs = Dropout(0.3)(outputs)
-outputs = BatchNormalization()(outputs)
-outputs = Dense(128, activation="relu")(outputs)
-outputs = BatchNormalization()(outputs)
-outputs = Dense(128, activation="relu")(outputs)
-outputs = BatchNormalization()(outputs)
-outputs = Dense(64, activation="relu")(outputs)
-outputs = BatchNormalization()(outputs)
-outputs = Dense(32, activation="relu")(outputs)
-outputs = BatchNormalization()(outputs)
-outputs = Dense(16, activation="relu")(outputs)
-outputs = BatchNormalization()(outputs)
-outputs = Dense(1, activation="sigmoid")(outputs)
+dense_input = Input(shape=(train_X.shape[1], ))
+dense_output = Dropout(0.2)(dense_input)
+dense_output = Dense(512, activation="relu")(dense_output)
+dense_output = BatchNormalization()(dense_output)
+dense_output = Dropout(0.3)(dense_output)
+dense_output = Dense(256, activation="relu")(dense_output)
+dense_output = Dropout(0.3)(dense_output)
+dense_output = BatchNormalization()(dense_output)
+dense_output = Dense(128, activation="relu")(dense_output)
+dense_output = BatchNormalization()(dense_output)
 
-model = Model(inputs, outputs)
+title_input = Input(shape=(train_title.shape[1], ))
+title_embedding_layer = Embedding(1000, 32, input_length=train_title.shape[1])(title_input)
+title_rnn_output = CuDNNGRU(64)(title_embedding_layer)
+title_rnn_output = BatchNormalization()(title_rnn_output)
+
+desc_input = Input(shape=(train_desc.shape[1], ))
+desc_embedding_layer = Embedding(1000, 32, input_length=train_desc.shape[1])(desc_input)
+desc_rnn_output = CuDNNGRU(64)(desc_embedding_layer)
+desc_rnn_output = BatchNormalization()(desc_rnn_output)
+
+vgg16_model = VGG16(input_shape=(224, 224, 3), include_top=False)
+for layer in vgg16_model:
+    layer.trainable = False
+
+image_input = vgg16_model.input
+image_output = Flatten()(vgg16_model.output)
+image_output = Dense(512, activation="relu")(image_model)
+
+output = Concatenate()([dense_output, title_rnn_output, desc_rnn_output, image_output])
+output = Dense(512, activation="relu")(output)
+output = BatchNormalization()(output)
+output = Dense(256, activation="relu")(output)
+output = BatchNormalization()(output)
+output = Dense(128, activation="relu")(output)
+output = BatchNormalization()(output)
+output = Dense(64, activation="relu")(output)
+output = BatchNormalization()(output)
+output = Dense(32, activation="relu")(output)
+output = BatchNormalization()(output)
+output = Dense(16, activation="relu")(output)
+output = BatchNormalization()(output)
+output = Dense(1, activation="sigmoid")(output)
+
+model = Model([dense_input, title_input, desc_input, image_input], output)
 model.compile(optimizer="Adam", loss=keras_rmse, metrics=[keras_rmse, "mean_squared_error"])
-history = model.fit(train_X, train_df.deal_probability, batch_size=1024, epochs=20,
-                    validation_data=(val_X, val_df.deal_probability),
-                   callbacks=[EarlyStopping()])
-
-
+history = model.fit_generator(
+    train_generator,
+    steps_per_epoch = np.ceil(train_X.shape[0] / 32),
+    validation_data = val_generator,
+    validation_steps = np.ceil(val_X.shape[0] / 32),
+    callbacks = [EarlyStopping()],
+    epochs = 10
+)
