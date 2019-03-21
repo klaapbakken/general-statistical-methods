@@ -109,7 +109,7 @@ output = Dense(32, activation="relu")(output)
 output = BatchNormalization()(output)
 output = Dense(1, activation="sigmoid")(output)
 
-model = Model([dense_input, title_input, desc_input image_input], output)
+model = Model([dense_input, title_input, desc_input, image_input], output)
 model.compile(optimizer="Adam", loss=keras_rmse, metrics=[keras_rmse, "mean_squared_error"])
 
 print(model.summary())
