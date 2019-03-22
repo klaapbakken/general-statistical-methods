@@ -46,5 +46,5 @@ for path in val_df.image_path.values:
         print("Corrupt or nonexisting file found")
 
 
-corrupt_df = pd.DataFrame({"corrupt_path" : np.array(invalid)})
+corrupt_df = pd.DataFrame(data={"corrupt_path" : invalid})
 corrupt_df.to_csv(os.path.join(data_folder, "external", "corrupt_files.csv"))
