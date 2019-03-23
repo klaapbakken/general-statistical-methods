@@ -57,6 +57,15 @@ def change_data_representation(df, feature_to_index_maps, data_folder, image_fol
     
     num_df.price.fillna(num_df.groupby("category_name")["price"].transform("mean"),
                         inplace=True)
+    
+    corrupt_df = pd.read_csv(os.path.join(data_folder, "external", corrupt_files))
+    corrupt_files = corrupt_df.corrupt_path.values
+    
+    num_df.replace(to_replace={"image_path" : corrupt_files},
+     value={"image_path" : [empty_img_relpath]*len(corrupt_files)},
+     inplace=True)
+
+
 
     features_to_keep = ["title", "description", "price", "deal_probability", "user_active_ads",\
                         "image_path", "category_index", "region_index", "parent_category_index",\
