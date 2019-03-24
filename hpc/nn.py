@@ -5,6 +5,11 @@ import os
 import keras
 import sys
 
+from skimage.io import imread
+from skimage.transform import resize
+
+import warnings
+
 from keras.preprocessing.image import ImageDataGenerator
 from keras.applications.inception_v3 import InceptionV3
 from keras.layers import Dense, Flatten, Embedding, Input, Dropout, Concatenate, BatchNormalization, CuDNNGRU
@@ -13,14 +18,43 @@ from keras.optimizers import Adam, SGD, RMSprop
 from keras import backend as K
 from keras.callbacks import EarlyStopping
 from keras.models import load_model
+from keras.utils import Sequence
 
 from scipy import sparse
 
-def data_generator(image_generator, X, X_title, X_desc):
-    index_generator = image_generator.index_generator
-    for images, targets in image_generator:
-        indices = next(index_generator)
-        yield [X[indices, :].toarray(), X_title[indices, :], X_desc[indices, :], images], targets
+warnings.filterwarnings("ignore")
+
+class DataGenerator(Sequence):
+    def __init__(self, X, text, desc, image_df, batch_size, image_folder):
+        self.X = X
+        self.text = text
+        self.desc = desc
+        self.image_paths = image_df.image_path.values
+        self.y = image_df.deal_probability.values
+        self.batch_size = batch_size
+        self.image_folder = image_folder
+    
+    def __len__(self):
+        return int(np.ceil(self.X.shape[0] / self.batch_size))
+    
+    def __getitem__(self, idx):
+        batch_X = self.X[idx * self.batch_size:(idx + 1) * self.batch_size, :]
+        batch_text = self.text[idx * self.batch_size:(idx + 1) * self.batch_size, :]
+        batch_desc = self.desc[idx * self.batch_size:(idx + 1) * self.batch_size, :]
+        batch_y = self.y[idx * self.batch_size:(idx + 1) * self.batch_size]
+        batch_path = self.image_paths[idx * self.batch_size:(idx + 1) * self.batch_size]
+        
+        batch_image = np.array([
+            resize(
+                imread(
+                    os.path.join(
+                        self.image_folder,
+                        file_name)
+                ),
+                (224, 224)) 
+            for file_name in batch_path])
+    
+        return [(batch_X.toarray(), batch_text, batch_desc, batch_image), batch_y]
 
 def keras_rmse(y_true, y_pred):
     return K.sqrt(K.mean(K.square(y_pred - y_true)))
@@ -43,30 +77,8 @@ val_desc = np.load(os.path.join(data_folder, "processed", "val_desc.npy"))
 train_df = pd.read_csv(os.path.join(data_folder, "processed", "train_image_df.csv"))
 val_df = pd.read_csv(os.path.join(data_folder, "processed", "val_image_df.csv"))
 
-image_generator = ImageDataGenerator()
-
-train_image_generator = image_generator.flow_from_dataframe(
-    dataframe=train_df,
-    directory=image_folder,
-    x_col="image_path",
-    y_col="deal_probability",
-    class_mode='other',
-    target_size=(224, 224),
-    color_mode='rgb',
-    batch_size=128)
-
-val_image_generator = image_generator.flow_from_dataframe(
-    dataframe=val_df,
-    directory=image_folder,
-    x_col="image_path",
-    y_col="deal_probability",
-    class_mode='other',
-    target_size=(224, 224),
-    color_mode='rgb',
-    batch_size=128)
-
-train_generator = data_generator(train_image_generator, train_X, train_title, train_desc)
-val_generator = data_generator(val_image_generator, val_X, val_title, val_desc)
+train_generator = DataGenerator(train_X, train_title, train_desc, train_df[["image_path", "deal_probability"]], 128, image_folder)
+val_image_generator = DataGenerator(val_X, val_title, val_desc, val_df[["image_path", "deal_probability"]], 128, image_folder)
 
 #Neural network
 
@@ -115,11 +127,9 @@ model.compile(optimizer="Adam", loss=keras_rmse, metrics=[keras_rmse, "mean_squa
 model.summary()
 history = model.fit_generator(
     train_generator,
-    steps_per_epoch = np.ceil(train_X.shape[0] / 128),
     validation_data = val_generator,
-    validation_steps = np.ceil(val_X.shape[0] / 128),
     callbacks = [EarlyStopping()],
-    epochs = 5
+    epochs = 3
 )
 
 model.save("trained_model.h5")
