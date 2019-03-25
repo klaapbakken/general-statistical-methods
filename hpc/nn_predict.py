@@ -47,10 +47,6 @@ def change_data_representation(df, feature_to_index_maps, data_folder, image_fol
     
     empty_img_path = os.path.join(data_folder, "external", "empty_img.jpg")
     
-    empty_img = Image.fromarray(np.zeros((224, 224, 3)).astype(np.uint8))
-    empty_img_path = os.path.join(data_folder, "external", "empty_img.jpg")
-    empty_img.save(empty_img_path)
-    
     empty_img_relpath = os.path.relpath(empty_img_path, image_folder)
     
     num_df = df.assign(category_index = df.category_name.map(feature_to_index_maps[0]),
@@ -224,7 +220,7 @@ test_X = sparse.hstack((test_cat_X, test_num_X)).tocsr()
 
 test_generator = TestDataGenerator(test_X, test_title_array, test_desc_array, test_df[["image_path", "deal_probability"]], 32, test_image_folder_path, test_ids)
 
-model = load_model("trained_model.h5")
+model = load_model("trained_model.h5", custom_objects={"keras_rmse" : keras_rmse})
 
 prediction_list = []
 id_list = []
