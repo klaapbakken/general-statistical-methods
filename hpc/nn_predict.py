@@ -74,7 +74,7 @@ def change_data_representation(df, feature_to_index_maps, data_folder, image_fol
     num_df.price.fillna(num_df.groupby("category_name")["price"].transform("mean"),
                         inplace=True)
     
-    corrupt_df = pd.read_csv(os.path.join(data_folder, "external", corrupt_files))
+    corrupt_df = pd.read_csv(os.path.join(data_folder, "external", "corrupt_files.csv"))
     corrupt_files = corrupt_df.corrupt_path.values
     
     num_df.replace(to_replace={"image_path" : corrupt_files},
@@ -216,9 +216,9 @@ test_title_array = pad_sequences(test_title, maxlen=maximum_title)
 
 test_desc_array = pad_sequences(test_title, maxlen=maximum_desc)
 
-test_X = sparse.hstack((test_cat_X, val_num_X)).tocsr()
+test_X = sparse.hstack((test_cat_X, test_num_X)).tocsr()
 
-test_generator = DataGenerator(test_X, test_title_array, test_desc_array, test_df[["image_path", "deal_probability"]], 32, test_image_folder)
+test_generator = TestDataGenerator(test_X, test_title_array, test_desc_array, test_df[["image_path", "deal_probability"]], 32, test_image_folder_path)
 
 model = load_model("trained_model.h5")
 

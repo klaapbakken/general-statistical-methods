@@ -54,7 +54,7 @@ class DataGenerator(Sequence):
                 (224, 224)) 
             for file_name in batch_path])
     
-        return [(batch_X.toarray(), batch_text, batch_desc, batch_image), batch_y]
+        return [batch_X.toarray(), batch_text, batch_desc, batch_image], batch_y
 
 def keras_rmse(y_true, y_pred):
     return K.sqrt(K.mean(K.square(y_pred - y_true)))
@@ -77,8 +77,8 @@ val_desc = np.load(os.path.join(data_folder, "processed", "val_desc.npy"))
 train_df = pd.read_csv(os.path.join(data_folder, "processed", "train_image_df.csv"))
 val_df = pd.read_csv(os.path.join(data_folder, "processed", "val_image_df.csv"))
 
-train_generator = DataGenerator(train_X, train_title, train_desc, train_df[["image_path", "deal_probability"]], 128, image_folder)
-val_image_generator = DataGenerator(val_X, val_title, val_desc, val_df[["image_path", "deal_probability"]], 128, image_folder)
+train_generator = DataGenerator(train_X, train_title, train_desc, train_df[["image_path", "deal_probability"]], 32, image_folder)
+val_generator = DataGenerator(val_X, val_title, val_desc, val_df[["image_path", "deal_probability"]], 32, image_folder)
 
 #Neural network
 
@@ -129,7 +129,8 @@ history = model.fit_generator(
     train_generator,
     validation_data = val_generator,
     callbacks = [EarlyStopping()],
-    epochs = 3
+    epochs = 10,
+    workers = 8
 )
 
 model.save("trained_model.h5")
