@@ -218,7 +218,7 @@ test_desc_array = pad_sequences(test_title, maxlen=maximum_desc)
 
 test_X = sparse.hstack((test_cat_X, test_num_X)).tocsr()
 
-test_generator = TestDataGenerator(test_X, test_title_array, test_desc_array, test_df[["image_path", "deal_probability"]], 32, test_image_folder_path)
+test_generator = TestDataGenerator(test_X, test_title_array, test_desc_array, test_df[["image_path", "deal_probability"]], 32, test_image_folder_path, test_ids)
 
 model = load_model("trained_model.h5")
 
