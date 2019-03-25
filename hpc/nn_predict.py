@@ -118,6 +118,10 @@ def one_hot_encode(df, enc):
                           "param_1_index", "user_type_index"]
     return enc.transform(df[categorical_columns])
 
+def keras_rmse(y_true, y_pred):
+    return K.sqrt(K.mean(K.square(y_pred - y_true)))
+
+
 class TestDataGenerator(Sequence):
     def __init__(self, X, text, desc, image_df, batch_size, image_folder, ids):
         self.X = X
