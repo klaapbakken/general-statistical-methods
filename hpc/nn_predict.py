@@ -230,11 +230,15 @@ prediction_list = []
 id_list = []
 for index in range(test_generator.__len__()):
     X, y, ids = test_generator.__getitem__(index)
+    print(X.shape, ids.shap)
     prediction_list.append(model.predict_on_batch((X)))
     id_list.append(ids)
 
 predictions = np.concatenate(prediction_list)
 ids = np.concatenate(id_list)
+
+np.save("preds.npy", predictions)
+np.save("ids.npy", ids)
 
 predictions_df = pd.DataFrame(data={"item_id" : ids, "deal_probability" : predictions})
 predictions.to_csv("predictions.csv")
