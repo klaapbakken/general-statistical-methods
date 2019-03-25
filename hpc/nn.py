@@ -89,18 +89,14 @@ dense_output = Dense(32, activation="relu")(dense_output)
 dense_output = BatchNormalization()(dense_output)
 
 title_input = Input(shape=(train_title.shape[1], ))
-title_embedding_layer = Embedding(2500, 75, input_length=train_title.shape[1])(title_input)
-title_rnn_output = CuDNNGRU(32)(title_embedding_layer)
+title_embedding_layer = Embedding(2500, 100, input_length=train_title.shape[1])(title_input)
+title_rnn_output = CuDNNGRU(64)(title_embedding_layer)
 title_rnn_output = BatchNormalization()(title_rnn_output)
 title_rnn_output = Dense(32, activation="relu")(title_rnn_output)
-title_rnn_output = BatchNormalization()(title_rnn_output)
-title_rnn_output = Dense(16, activation="relu")(title_rnn_output)
 
 desc_input = Input(shape=(train_desc.shape[1], ))
-desc_embedding_layer = Embedding(2500, 75, input_length=train_desc.shape[1])(desc_input)
+desc_embedding_layer = Embedding(2500, 100, input_length=train_desc.shape[1])(desc_input)
 desc_rnn_output = CuDNNGRU(64)(desc_embedding_layer)
-desc_rnn_output = BatchNormalization()(desc_rnn_output)
-desc_rnn_output = Dense(64, activation="relu")(desc_rnn_output)
 desc_rnn_output = BatchNormalization()(desc_rnn_output)
 desc_rnn_output = Dense(32, activation="relu")(desc_rnn_output)
 
@@ -110,14 +106,16 @@ for layer in image_model.layers:
 
 image_input = image_model.input
 image_output = Flatten()(image_model.output)
-image_output = Dense(32, activation="relu")(image_output)
+image_output = Dense(64, activation="relu")(image_output)
 
 output = Concatenate()([dense_output, title_rnn_output, desc_rnn_output, image_output])
-output = Dense(32, activation="relu")(output)
+output = Dropout(0.2)(output)
+output = Dense(256, activation="relu")(output)
+output = Dropout(0.3)(output)
+output = BatchNormalization()(output)
+output = Dense(64, activation="relu")(output)
 output = BatchNormalization()(output)
 output = Dense(16, activation="relu")(output)
-output = BatchNormalization()(output)
-output = Dense(8, activation="relu")(output)
 output = BatchNormalization()(output)
 output = Dense(1, activation="sigmoid")(output)
 
@@ -133,4 +131,4 @@ history = model.fit_generator(
     workers = 8
 )
 
-model.save("trained_model.h5")
+model.save("trained_model_complex.h5")
