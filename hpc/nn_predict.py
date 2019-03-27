@@ -118,8 +118,8 @@ def keras_rmse(y_true, y_pred):
     return K.sqrt(K.mean(K.square(y_pred - y_true)))
 
 
-class TestDataGenerator(Sequence):
-    def __init__(self, X, text, desc, image_df, batch_size, image_folder, ids):
+class DataGenerator(Sequence):
+    def __init__(self, X, text, desc, image_df, batch_size, image_folder):
         self.X = X
         self.text = text
         self.desc = desc
@@ -127,7 +127,6 @@ class TestDataGenerator(Sequence):
         self.y = image_df.deal_probability.values
         self.batch_size = batch_size
         self.image_folder = image_folder
-        self.ids = ids
     
     def __len__(self):
         return int(np.ceil(self.X.shape[0] / self.batch_size))
@@ -138,7 +137,6 @@ class TestDataGenerator(Sequence):
         batch_desc = self.desc[idx * self.batch_size:(idx + 1) * self.batch_size, :]
         batch_y = self.y[idx * self.batch_size:(idx + 1) * self.batch_size]
         batch_path = self.image_paths[idx * self.batch_size:(idx + 1) * self.batch_size]
-        batch_ids = self.ids[idx * self.batch_size:(idx + 1) * self.batch_size]
         
         batch_image = np.array([
             resize(
@@ -150,7 +148,7 @@ class TestDataGenerator(Sequence):
                 (224, 224)) 
             for file_name in batch_path])
     
-        return [batch_X.toarray(), batch_text, batch_desc, batch_image], batch_y, batch_ids
+        return [batch_X.toarray(), batch_text, batch_desc, batch_image], batch_y
 
 with open(os.path.join(os.pardir, "train_path.txt"), 'r') as f:
     train_path = f.readline().rstrip("\n")
@@ -218,26 +216,18 @@ test_desc_array = pad_sequences(test_title, maxlen=maximum_desc)
 
 test_X = sparse.hstack((test_cat_X, test_num_X)).tocsr()
 
-test_generator = TestDataGenerator(test_X, test_title_array, test_desc_array, test_df[["image_path", "deal_probability"]], 32, test_image_folder_path, test_ids)
+test_generator = DataGenerator(test_X, test_title_array, test_desc_array, test_df[["image_path", "deal_probability"]], 32, test_image_folder_path)
 
-model = load_model("trained_model.h5", custom_objects={"keras_rmse" : keras_rmse})
+model = load_model("checkpoint_model.h5", custom_objects={"keras_rmse" : keras_rmse})
 
-prediction_list = []
-id_list = []
-for index in range(test_generator.__len__()):
-    X, y, ids = test_generator.__getitem__(index)
-    print(X.shape, ids.shap)
-    prediction_list.append(model.predict_on_batch((X)))
-    id_list.append(ids)
+predictions = model.predict_generator(test_generator, workers=8)
 
-predictions = np.concatenate(prediction_list)
-ids = np.concatenate(id_list)
 
 np.save("preds.npy", predictions)
-np.save("ids.npy", ids)
+np.save("ids.npy", test_ids)
 
-predictions_df = pd.DataFrame(data={"item_id" : ids, "deal_probability" : predictions})
-predictions.to_csv("predictions.csv")
+predictions_df = pd.DataFrame(data={"item_id" : test_ids, "deal_probability" : np.squeeze(predictions)})
+predictions_df.to_csv("predictions.csv", index=False)
 
 
 
