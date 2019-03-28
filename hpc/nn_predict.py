@@ -218,7 +218,7 @@ test_X = sparse.hstack((test_cat_X, test_num_X)).tocsr()
 
 test_generator = DataGenerator(test_X, test_title_array, test_desc_array, test_df[["image_path", "deal_probability"]], 32, test_image_folder_path)
 
-model = load_model("checkpoint_model.h5", custom_objects={"keras_rmse" : keras_rmse})
+model = load_model("trained_model.h5", custom_objects={"keras_rmse" : keras_rmse})
 
 predictions = model.predict_generator(test_generator, workers=8)
 
