@@ -39,13 +39,17 @@ def trim_dataframe(df):
     activation_range_length = activation_dates[-1] - activation_dates[1]
     trimmed_df = trimmed_df.assign(days_since_activation = last_activation_date - pd.to_datetime(trimmed_df.activation_date))
     
-    features_to_drop = ["item_id", "city", "param_2", "param_3", "item_seq_number", "image_top_1", "user_id", "activation_date"]
+    features_to_drop = ["item_id", "param_2", "param_3", "item_seq_number", "user_id", "activation_date"]
     trimmed_df = trimmed_df.drop(features_to_drop, axis=1)
     return trimmed_df
 
 def change_data_representation(df, feature_to_index_maps, data_folder, image_folder):
     
     empty_img_path = os.path.join(data_folder, "external", "empty_img.jpg")
+    
+    empty_img = Image.fromarray(np.zeros((224, 224, 3)).astype(np.uint8))
+    empty_img_path = os.path.join(data_folder, "external", "empty_img.jpg")
+    empty_img.save(empty_img_path)
     
     empty_img_relpath = os.path.relpath(empty_img_path, image_folder)
     
@@ -54,6 +58,8 @@ def change_data_representation(df, feature_to_index_maps, data_folder, image_fol
                        parent_category_index = df.parent_category_name.map(feature_to_index_maps[2]),
                        param_1_index = df.param_1.map(feature_to_index_maps[3]),
                        user_type_index = df.user_type.map(feature_to_index_maps[4]),
+                       city_index = df.city.map(feature_to_index_maps[5]),
+                       image_top_1_index = df.image_top_1.map(feature_to_index_maps[6]),
                        image_path = df.image + ".jpg",
                        days_since_activation_num = df.days_since_activation.astype(int)
                       )
@@ -64,6 +70,8 @@ def change_data_representation(df, feature_to_index_maps, data_folder, image_fol
                    "user_type_index" : 0,
                    "category_index" : 0,
                    "description" : "",
+                   "city_index" : 0,
+                   "image_top_1" : 0,
                   "image_path" : empty_img_relpath},
                  inplace=True)
     
@@ -79,9 +87,9 @@ def change_data_representation(df, feature_to_index_maps, data_folder, image_fol
 
 
 
-    features_to_keep = ["title", "description", "price", "deal_probability",\
+    features_to_keep = ["title", "description", "price", "deal_probability", "city_index",\
                         "image_path", "category_index", "region_index", "parent_category_index",\
-                       "param_1_index", "user_type_index"]
+                       "param_1_index", "user_type_index", "image_top_1"]
 
     num_df = num_df[features_to_keep]
     
@@ -98,20 +106,37 @@ def get_feature_to_index_maps(df):
                              in enumerate(df.param_1.unique())}
     
     user_type_index_mapping = dict(zip(df.user_type.unique(), np.arange(1,4)))
+
+    big_cities = df[df.city.isin(df.city.value_counts()[df.city.value_counts() > 100].index)].city.unique()
+
+    city_index_mapping = {city : (i + 1 ) for i, city in enumerate(big_cities)}
+    L = len(city_index_mapping)
+    for city in df.city.unique():
+        if city not in list(city_index_mapping.keys()):
+            city_index_mapping[city] = L + 1
+
+    common_images = df[df.image_top_1.isin(df.image_top_1.value_counts()[df.image_top_1.value_counts() > 500].index)].image_top_1.unique()
+
+    image_top_1_index_mapping = {image_top_1 : (i + 1) for i, image_top_1 in enumerate(common_images)}
+    L = len(image_top_1_index_mapping)
+    for image_top_1 in df.image_top_1.unique():
+        if image_top_1 not in list(image_top_1_index_mapping.keys()):
+            image_top_1_index_mapping[image_top_1] = L + 1
     
     return [category_index_mapping, region_index_mapping, parent_category_index_mapping,\
-            param_1_index_mapping, user_type_index_mapping]
+            param_1_index_mapping, user_type_index_mapping, city_index_mapping,\
+                image_top_1_index_mapping]
 
 def create_one_hot_encoder(df):
     one_hot_enc = OneHotEncoder(handle_unknown="ignore")
     categorical_columns = ["category_index", "region_index", "parent_category_index",\
-                          "param_1_index", "user_type_index"]
+                          "param_1_index", "user_type_index", "city", "image_top_1_index"]
     one_hot_enc.fit(df[categorical_columns])
     return one_hot_enc
 
 def one_hot_encode(df, enc):
     categorical_columns = ["category_index", "region_index", "parent_category_index",\
-                          "param_1_index", "user_type_index"]
+                          "param_1_index", "user_type_index", "city", "image_top_1_index"]
     return enc.transform(df[categorical_columns])
 
 def keras_rmse(y_true, y_pred):

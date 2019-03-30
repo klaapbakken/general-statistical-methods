@@ -4,6 +4,7 @@ import numpy as np
 import os
 import keras
 import sys
+import json
 
 from skimage.io import imread
 from skimage.transform import resize
@@ -84,20 +85,19 @@ val_generator = DataGenerator(val_X, val_title, val_desc, val_df[["image_path", 
 
 dense_input = Input(shape=(train_X.shape[1], ))
 dense_output = Dense(128, activation="relu")(dense_input)
-dense_output = Dense(64, activation="relu")(dense_output)
-dense_output = Dense(16, activation="relu")(dense_output)
+dense_output = BatchNormalization()(dense_output)
 
 title_input = Input(shape=(train_title.shape[1], ))
 title_embedding_layer = Embedding(10000, 50, input_length=train_title.shape[1])(title_input)
 title_rnn_output = CuDNNGRU(64)(title_embedding_layer)
-title_rnn_output = Dense(32, activation="relu")(title_rnn_output)
-title_rnn_output = Dense(8, activation="relu")(title_rnn_output)
+title_rnn_output = Dense(64, activation="relu")(title_rnn_output)
+title_rnn_output = BatchNormalization()(title_rnn_output)
 
 desc_input = Input(shape=(train_desc.shape[1], ))
 desc_embedding_layer = Embedding(10000, 50, input_length=train_desc.shape[1])(desc_input)
 desc_rnn_output = CuDNNGRU(64)(desc_embedding_layer)
-desc_rnn_output = Dense(32, activation="relu")(desc_rnn_output)
-desc_rnn_output = Dense(8, activation="relu")(desc_rnn_output)
+desc_rnn_output = Dense(64, activation="relu")(desc_rnn_output)
+desc_rnn_output = BatchNormalization()(desc_rnn_output)
 
 image_model = InceptionV3(input_shape=(224, 224, 3), include_top=False)
 for layer in image_model.layers:
@@ -105,24 +105,40 @@ for layer in image_model.layers:
 
 image_input = image_model.input
 image_output = Flatten()(image_model.output)
-image_output = Dense(64, activation="relu")(image_output)
-image_output = Dense(8, activation="relu")(image_output)
+image_output = Dense(128, activation="relu")(image_output)
+image_output = BatchNormalization()(image_output)
 
 output = Concatenate()([dense_output, title_rnn_output, desc_rnn_output, image_output])
+output = Dropout(0.2)(output)
 output = Dense(512, activation="relu")(output)
+output = BatchNormalization()(output)
 output = Dropout(0.1)(output)
 output = Dense(256, activation="relu")(output)
+output = BatchNormalization()(output)
 output = Dropout(0.1)(output)
-output = Dense(192, activation="relu")(output)
+output = Dense(256, activation="relu")(output)
+output = BatchNormalization()(output)
+output = Dropout(0.1)(output)
 output = Dense(128, activation="relu")(output)
+output = BatchNormalization()(output)
+output = Dense(128, activation="relu")(output)
+output = BatchNormalization()(output)
 output = Dense(64, activation="relu")(output)
+output = BatchNormalization()(output)
 output = Dense(32, activation="relu")(output)
+output = BatchNormalization()(output)
+output = Dense(24, activation="relu")(output)
+output = BatchNormalization()(output)
 output = Dense(16, activation="relu")(output)
+output = BatchNormalization()(output)
+output = Dense(12, activation="relu")(output)
+output = BatchNormalization()(output)
 output = Dense(8, activation="relu")(output)
+output = BatchNormalization()(output)
 output = Dense(1, activation="sigmoid")(output)
 
 model = Model([dense_input, title_input, desc_input, image_input], output)
-model.compile(optimizer="Adam", loss=keras_rmse, metrics=[keras_rmse, "mean_squared_error"])
+model.compile(optimizer="Adam", loss=keras_rmse, metrics=[keras_rmse, "mean_squared_error", "mean_absolute_error"])
 
 model.summary()
 history = model.fit_generator(
@@ -134,3 +150,6 @@ history = model.fit_generator(
 )
 
 model.save("trained_model.h5")
+
+with open("history.json", "w") as f:
+    json.dump(history.history, f)
