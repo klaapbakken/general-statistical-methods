@@ -45,7 +45,7 @@ def change_data_representation(df, feature_to_index_maps, data_folder, image_fol
                        city_index = df.city.map(feature_to_index_maps[5]),
                        image_top_1_index = df.image_top_1.map(feature_to_index_maps[6]),
                        image_path = df.image + ".jpg",
-                       days_since_activation_num = df.days_since_activation.astype(int)
+                       days_since_activation_num = (df.days_since_activation / np.timedelta64(1, "D")).astype(int)
                       )
     
     num_df.fillna({"param_1_index" : 0,
@@ -55,7 +55,7 @@ def change_data_representation(df, feature_to_index_maps, data_folder, image_fol
                    "category_index" : 0,
                    "description" : "",
                    "city_index" : 0,
-                   "image_top_1" : 0,
+                   "image_top_1_index" : 0,
                   "image_path" : empty_img_relpath},
                  inplace=True)
     
@@ -73,7 +73,7 @@ def change_data_representation(df, feature_to_index_maps, data_folder, image_fol
 
     features_to_keep = ["title", "description", "price", "deal_probability", "city_index",\
                         "image_path", "category_index", "region_index", "parent_category_index",\
-                       "param_1_index", "user_type_index", "image_top_1"]
+                       "param_1_index", "user_type_index", "image_top_1_index"]
 
     num_df = num_df[features_to_keep]
     
@@ -114,13 +114,13 @@ def get_feature_to_index_maps(df):
 def create_one_hot_encoder(df):
     one_hot_enc = OneHotEncoder(handle_unknown="ignore")
     categorical_columns = ["category_index", "region_index", "parent_category_index",\
-                          "param_1_index", "user_type_index", "city", "image_top_1_index"]
+                          "param_1_index", "user_type_index", "city_index", "image_top_1_index"]
     one_hot_enc.fit(df[categorical_columns])
     return one_hot_enc
 
 def one_hot_encode(df, enc):
     categorical_columns = ["category_index", "region_index", "parent_category_index",\
-                          "param_1_index", "user_type_index", "city", "image_top_1_index"]
+                          "param_1_index", "user_type_index", "city_index", "image_top_1_index"]
     return enc.transform(df[categorical_columns])
 
 def rmse(y_true, y_pred):
