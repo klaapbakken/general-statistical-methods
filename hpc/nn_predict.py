@@ -79,9 +79,9 @@ def change_data_representation(df, feature_to_index_maps, data_folder, image_fol
 
 
 
-    features_to_keep = ["title", "description", "price", "deal_probability", "user_active_ads",\
+    features_to_keep = ["title", "description", "price", "deal_probability",\
                         "image_path", "category_index", "region_index", "parent_category_index",\
-                       "param_1_index", "user_type_index", "days_since_activation_num"]
+                       "param_1_index", "user_type_index"]
 
     num_df = num_df[features_to_keep]
     
@@ -183,7 +183,7 @@ train_df = change_data_representation(raw_train_df, feature_to_index_maps, data_
 test_df = change_data_representation(raw_test_df, feature_to_index_maps, data_folder, test_image_folder_path)
 
 enc = create_one_hot_encoder(train_df)
-numerical_features = ["price", "user_active_ads", "days_since_activation_num"]
+numerical_features = ["price"]
 
 scaler = Normalizer()
 
@@ -198,7 +198,7 @@ test_num_X = scaler.transform(test_num_X)
 
 train_text_df = train_df.assign(td = train_df.title + train_df.description)
 vocabulary = train_text_df.td.values
-tokenizer = Tokenizer(num_words=2500)
+tokenizer = Tokenizer(num_words=10000)
 tokenizer.fit_on_texts(vocabulary)
 
 train_title = tokenizer.texts_to_sequences(train_df["title"].values)

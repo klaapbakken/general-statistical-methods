@@ -58,7 +58,7 @@ def change_data_representation(df, feature_to_index_maps, data_folder, image_fol
     num_df.price.fillna(num_df.groupby("category_name")["price"].transform("mean"),
                         inplace=True)
     
-    corrupt_df = pd.read_csv(os.path.join(data_folder, "external", corrupt_files))
+    corrupt_df = pd.read_csv(os.path.join(data_folder, "external", "corrupt_files.csv"))
     corrupt_files = corrupt_df.corrupt_path.values
     
     num_df.replace(to_replace={"image_path" : corrupt_files},
@@ -125,7 +125,7 @@ train_df = change_data_representation(raw_train_df, feature_to_index_maps, data_
 val_df = change_data_representation(raw_val_df, feature_to_index_maps, data_folder, train_image_folder_path)
 
 enc = create_one_hot_encoder(train_df)
-numerical_features = ["price", "user_active_ads", "days_since_activation_num"]
+numerical_features = ["price"]
 
 scaler = Normalizer()
 
